@@ -6,13 +6,31 @@
 }
 
 .sidebar-header {
-  
+  margin-bottom: 3em;
 }
 
 svg {
   display: inline-block;
-  vertical-align: middle;
+  margin: 0 .75em;
 }
 h2 {
   display: inline-block;
+  font-size: .97em;
+  color: #fff;
+  letter-spacing: 4px;
+  font-weight: 500;
 }
+ol {
+  list-style-type: none;
+}
+a {
+  color: white;
+  text-decoration: none;
+}
+.svg {
+  fill: #35B0E4;
+}
+.user-logo-wrapper {
+  margin: .75em;
+}
+

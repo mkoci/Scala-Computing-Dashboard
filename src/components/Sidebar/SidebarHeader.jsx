@@ -1,11 +1,12 @@
 import React, { useContext } from 'react';
 import { UserContext } from '../App';
 import './Sidebar.css';
+import { Box } from '@material-ui/core';
 
 export const SidebarHeader = ({user}) => {
   const userContext = useContext(UserContext);
   return (
-    <div className="sidebar-header">
+    <Box mb="3em">
       <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
         width="33.297px" height="33.277px" viewBox="0 0 33.297 33.277" style={{enableBackground: 'new 0 0 33.297 33.277'}}
         xmlSpace="preserve">
@@ -20,11 +21,11 @@ export const SidebarHeader = ({user}) => {
         <rect x="25.288" y="25.819" style={{fill: '#35B0E4'}} width="7.582" height="7.458"/>
       </svg>
 
-      <h2>SCALA COMPUTING</h2>
+      <h2>SCALA<br/>COMPUTING</h2>
 
       <div className="user-logo-wrapper">
         { !!userContext.user && <img src={userContext.logo} alt={`${userContext.user}-logo`}/> }
       </div>
-    </div>
+    </Box>
 );
 };
