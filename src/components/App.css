@@ -1,0 +1,12 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: 280px auto;
+  position: relative;
+  height: 100%;
+}
