@@ -3,13 +3,6 @@ import './App.css';
 import { Sidebar } from './Sidebar/Sidebar';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-const theme = createMuiTheme({
-  palette: {
-    primary:{ main: '#35B0E4'},
-    secondary: { main: '#8CD5DF'},
-  }
-});
-
 //Context for current User
 export const UserContext = React.createContext({});
 
@@ -26,7 +19,6 @@ export const App = () => {
   );
 };
 
-
 const Layout = () => (
   <ThemeProvider theme={theme}>
     <div className="app-container">
@@ -41,3 +33,19 @@ const Layout = () => (
     </div>
   </ThemeProvider>
 );
+
+const theme = createMuiTheme({
+  palette: {
+    primary:{ main: '#35B0E4'},
+    secondary: { main: '#8CD5DF'},
+  },
+  overrides: {
+    MuiSvgIcon: {
+      root: {
+        height: '1.5em',
+        width: '1.5em',
+        verticalAlign: 'middle'
+      }
+    }
+  }
+});

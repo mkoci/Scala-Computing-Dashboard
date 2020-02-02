@@ -8,6 +8,13 @@
 .sidebar-header {
   margin-bottom: 3em;
 }
+.user-logo-wrapper {
+  filter: grayscale(1);
+}
+.user-logo-wrapper > img {
+  width: 80%;
+  margin: 0 auto;
+}
 
 svg {
   display: inline-block;
@@ -24,13 +31,43 @@ ol {
   list-style-type: none;
 }
 a {
+  display: inline-block;
+  height: 1.5em;
+  line-height: 1.5em;
   color: white;
   text-decoration: none;
+  transition: transform .3s;
 }
-.svg {
-  fill: #35B0E4;
+li:hover > a {
+  font-weight: 800;
+}
+li > svg {
+  transition: transform .3s;
+}
+li:hover > svg {
+  transform: scale(1.05);
 }
 .user-logo-wrapper {
   margin: .75em;
 }
-
+nav {
+  margin-top: 15%;
+}
+ol {
+  padding: 0;
+}
+li {
+  height: 1.5em;
+  margin: 1.25em 0;
+  padding: 0;
+  display: flex;
+  align-items:center;
+  justify-content:flex-start;
+}
+.sidebar-footer {
+  margin-top: auto;
+  color: white;
+  font-size: .85em;
+  font-weight: 100;
+  padding: .5em
+}
