@@ -12,6 +12,7 @@ import EqualizerIcon from '@material-ui/icons/Equalizer';
 import PowerIcon from '@material-ui/icons/Power';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 import BuildIcon from '@material-ui/icons/Build';
+import { ContactSupportButton } from './ContactSupportButton';
 
 const navLinks = [
   { title: "JOBS", icon: <ListIcon color="primary"/>},
@@ -82,8 +83,12 @@ const SidebarHeader = ({user}) => {
 const SidebarFooter = () => {
   const currentYear = new Date().getFullYear(); 
   return (
-    <div bottom="0" className="sidebar-footer">
-      Copyright &copy; {currentYear}, Scala Computing Inc.
+    <div className="sidebar-footer">
+      <ContactSupportButton/>
+      <div className="copyright-text">
+        <p>Copyright &copy; {currentYear}, Scala Computing Inc.</p>
+      </div>
     </div>
   )
 }
+

@@ -1,0 +1,21 @@
+.support-wrapper {
+  width: 100%;
+  margin-bottom: 3em;
+  cursor: pointer;
+}
+.support-wrapper > svg {
+  margin: 0 .75em;
+}
+.support-text {
+  display: inline-block;
+  height: 1.5em;
+  line-height: 1.5em;
+  color: white;
+  text-decoration: none;
+  transition: transform .3s;
+  font-size: 1.1em;
+}
+
+.support-text:hover {
+  font-size: 800;
+}

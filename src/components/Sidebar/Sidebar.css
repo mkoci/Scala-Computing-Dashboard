@@ -1,8 +1,8 @@
 .sidebar-container {
-  /* background: #2E507A; */
   height: 100%;
   background: rgb(46,80,122);
   background: linear-gradient(180deg, rgba(46,80,122,1) 48%, rgba(6,25,47,1) 100%);
+  position: fixed;
 }
 
 .sidebar-header {
@@ -69,5 +69,12 @@ li {
   color: white;
   font-size: .85em;
   font-weight: 100;
-  padding: .5em
+}
+
+.copyright-text {
+  padding: .5em;
+}
+
+p {
+  margin: 0;
 }
