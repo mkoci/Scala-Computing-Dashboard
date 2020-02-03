@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { UserContext } from '../App';
 import { Box } from '@material-ui/core';
 import './Sidebar.css';
@@ -41,9 +42,9 @@ export const Sidebar = () => {
           { navLinks.map(l => (
             <li key={l.title}>
               {l.icon}
-              <a href={`/${l.title.toLowerCase()}`}>
+              <Link to={`/${l.title.toLowerCase()}`}>
                 {l.title} 
-              </a>
+              </Link>
             </li>
           ))}
         </ol>

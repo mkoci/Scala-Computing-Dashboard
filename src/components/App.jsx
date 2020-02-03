@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.css';
 import { Sidebar } from './Sidebar/Sidebar';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-//Context for current User
 export const UserContext = React.createContext({});
 
 export const App = () => {
+  //init base context for user.
   const [userContext] = useState({
     user: 'skynext',
     logo: 'https://www.skymetweather.com/themes/skymet/images/logo.png'
   });
-
   return (
-    <UserContext.Provider value={{ user: userContext.user, logo: userContext.logo}}>
-      <Layout/>
-    </UserContext.Provider>
+    <Router>
+      <UserContext.Provider value={{ user: userContext.user, logo: userContext.logo}}>
+        <Layout/>
+      </UserContext.Provider>
+    </Router>
   );
 };
 
@@ -26,14 +28,40 @@ const Layout = () => (
         <section className="sidebar-section">
           <Sidebar/>
         </section>
-        <section className="main-section">
-          <div id="main-content"/>
+        <section className="sidebar-placeholder"/>
+        <section className="main-section" id="main-section">
+          <UserBar/>
+          <Routing/>        
         </section>
       </div>
     </div>
   </ThemeProvider>
 );
 
+const Routing = () => (
+  <Switch>
+    <Route path="/files" render={() => {
+      if(!!window.loadFileScript) window.loadFileScript.exec();
+      return null
+    }}/>
+    <Route render={() => {
+      window.loadFileScript.exit();
+      return <NotFound/>
+    }}/>
+  </Switch>
+)
+
+const UserBar = () => {
+  const userContext = useContext(UserContext);
+  return (
+    <div className="user-bar">
+      <div className="user-dropdown">
+        <span>{userContext.user}</span>
+      </div>
+    </div>
+)}
+
+// Set material-ui default params
 const theme = createMuiTheme({
   palette: {
     primary:{ main: '#35B0E4'},
@@ -49,3 +77,9 @@ const theme = createMuiTheme({
     }
   }
 });
+
+const NotFound = () => (
+  <div className="not-found">
+    <h1>Sorry, this route is under construction. Check back soon</h1>
+  </div>
+)

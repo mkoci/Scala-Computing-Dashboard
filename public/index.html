@@ -2,16 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="shortcut icon" href="https://corp.scalacomputing.com/sites/all/themes/scala/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="shortcut icon" href="https://corp.scalacomputing.com/sites/all/themes/scala/favicon.ico" type="image/vnd.microsoft.icon" SameSite="none">
     <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width"/>
     <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="https://corp.scalacomputing.com/sites/all/themes/scala/favicon.ico"/>
+    <link rel="apple-touch-icon" href="https://corp.scalacomputing.com/sites/all/themes/scala/favicon.ico" SameSite="non"/>
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet"/>
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="stylesheet" href="%PUBLIC_URL%/files.css"/>
     <title>Scala Computing Dashboard</title>
+    <script type="text/javascript" src="%PUBLIC_URL%/files.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <div id="file-root"></div>
   </body>
 </html>

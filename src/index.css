@@ -1,8 +1,15 @@
 body {
+  position: relative;
   margin: 0;
   font-family: 'Nunito', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .primary-color {

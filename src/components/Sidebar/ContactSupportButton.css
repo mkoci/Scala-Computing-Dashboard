@@ -5,6 +5,7 @@
 }
 .support-wrapper > svg {
   margin: 0 .75em;
+  transition: transform .3s;
 }
 .support-text {
   display: inline-block;
@@ -15,7 +16,9 @@
   transition: transform .3s;
   font-size: 1.1em;
 }
-
-.support-text:hover {
-  font-size: 800;
+.support-wrapper:hover > svg {
+  transform: scale(1.0.5);
+}
+.support-wrapper:hover > span {
+  font-weight: 700;
 }
