@@ -1,10 +1,15 @@
 //Size assumed to be in KB
-// Random dates between range generated for 'preset' constant
-//https://stackoverflow.com/questions/9035627/elegant-method-to-generate-array-of-random-dates-within-two-dates
-function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
-}
 
+/////////////////////////////
+//  Constants and Helpers  //
+/////////////////////////////
+
+
+// Random dates between range generated for 'preset' constant
+// modified from: https://stackoverflow.com/questions/9035627/elegant-method-to-generate-array-of-random-dates-within-two-dates
+const randomDate = (start, end) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+
+// Preset is unordered
 const files = [
   {
     name: "zips",
@@ -80,9 +85,12 @@ const htmlString = `
     </ol>
   </div>
 </div>
-`
+` 
 
-// Loading of the vanilla js as well as exec and remove from dom
+////////////////////////////////
+//        Main Thread         //
+////////////////////////////////
+
 var loadFileScript=window.loadFileScript=window.loadFileScript||[];
 loadFileScript.exec = () => exec();
 
@@ -99,12 +107,10 @@ function insertHtml() {
   })
 }
 
-// Main Thread
-
 async function exec() {
   console.log('Loading script...');
   //deep copy collection to avoid reference errors
-  let current = JSON.parse(JSON.stringify(files));;
+  let current = files;
   let lastSort = 'name';
 
   function init(){
@@ -114,16 +120,16 @@ async function exec() {
     });
   };
 
-  //clean up listeners
+  // Terminate Script cleanly
   loadFileScript.exit = function exit(){
     removeListeners().then(() => removeHtml())
   }
 
-  ///////////    Exec Closure functions
+  // Attach and Remove listeners
   function addListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").addEventListener("click", newDirectory);
-      document.getElementById("upload-button").addEventListener("click", newFile);
+      document.getElementById("new-directory-button").addEventListener("click", handleNewDirectory);
+      document.getElementById("upload-button").addEventListener("click", handleNewFileClick);
       document.getElementById("name-button").addEventListener("click", e => handleSortClick(e));
       document.getElementById("type-button").addEventListener("click", e => handleSortClick(e));
       document.getElementById("date-button").addEventListener("click", e => handleSortClick(e));
@@ -134,15 +140,17 @@ async function exec() {
 
   function removeListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").removeEventListener("click", newDirectory, false);
-      document.getElementById("upload-button").removeEventListener("click", newFile, false);
-      document.getElementById("name-button").removeEventListener("click", e => sort(e), false);
-      document.getElementById("type-button").removeEventListener("click", e => sort(e), false);
-      document.getElementById("date-button").removeEventListener("click", e => sort(e), false);
-      document.getElementById("size-button").removeEventListener("click", e => sort(e), false);
+      document.getElementById("new-directory-button").removeEventListener("click", handleNewDirectory, false);
+      document.getElementById("upload-button").removeEventListener("click", handleNewFileClick, false);
+      document.getElementById("name-button").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("type-button").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("date-button").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("size-button").removeEventListener("click", e => handleSortClick(e), false);
       return resolve();
     })
   }
+
+  // "Member" Functions
   function newDirectory() {
     console.log('new directory add')
     current.push({
@@ -154,18 +162,19 @@ async function exec() {
     console.log(current)
   }
   function newFile() {
-    console.log('new file add')
-    current.push({
-      name: "new_directory",
-      type: "File",
-      date: Date.now().toString(),
-      size: 0
+    return new Promise( resolve => {
+      current.push({
+        name: "new_directory",
+        type: "File",
+        date: Date.now().toString(),
+        size: Math.floor(Math.random() * 100) + 1
+      })
+
     })
-    console.log(current)
   }
 
+  // Ad-hoc render function for ordered file list elements
   function renderListElements() {
-
     let list = document.getElementById('content-list');
     for(elem in current) {
       let li = document.createElement('li');
@@ -180,9 +189,9 @@ async function exec() {
     }
   }
 
-  function sort(e) { // attrib = (string), ascending (bool)
+  // simple sorting function extending Array.prototype.sort()
+  function sort(attrib) { // <attrib> target attribute for sorting
     return new Promise(resolve => {
-      let attrib = e.target.id.split('-')[0];
       current.sort((a,b) => {
         if(lastSort === attrib) {
           if(a[attrib] > b[attrib]) return 1;
@@ -192,18 +201,22 @@ async function exec() {
           else return 1
         }
       });
+      // keeps track of toggling for sorting
       lastSort = attrib;
       resolve();
     })
   }
 
+  // Handlers
   function handleSortClick(e) {
     let ol = document.getElementById('content-list');
     while(ol.firstChild) {
       ol.removeChild(ol.firstChild)
     }
-    sort(e).then(() => renderListElements());
+    sort(e.target.id.split('-')[0]).then(() => renderListElements());
   }
-  init();
+  function handleNewDirectory() { newDirectory().then(() => renderListElements()) };
+  function handleNewFileClick() { newFile().then(() => renderListElements()) }
 
+  init();
 }
