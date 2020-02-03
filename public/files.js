@@ -61,6 +61,7 @@ const files = [
   },
 ];
 
+// Basis for dom content to be inserted
 const htmlString = `
 <div id="file-container">
   <h1 class="file-header">Files</h1>
@@ -112,8 +113,10 @@ async function exec() {
   //deep copy collection to avoid reference errors
   let current = files;
   let lastSort = 'name';
+  let semiphore = 1;
 
   function init(){
+    loadFileScript.invoked=1;
     insertHtml().then(() => {
       addListeners();
       renderListElements();
@@ -122,14 +125,15 @@ async function exec() {
 
   // Terminate Script cleanly
   loadFileScript.exit = function exit(){
+    loadFileScript.invoked=0;
     removeListeners().then(() => removeHtml())
   }
 
   // Attach and Remove listeners
   function addListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").addEventListener("click", handleNewDirectory);
-      document.getElementById("upload-button").addEventListener("click", handleNewFileClick);
+      document.getElementById("new-directory-button").addEventListener("click", () => addNew('directory'));
+      document.getElementById("upload-button").addEventListener("click", () => addNew('file'));
       document.getElementById("name-button").addEventListener("click", e => handleSortClick(e));
       document.getElementById("type-button").addEventListener("click", e => handleSortClick(e));
       document.getElementById("date-button").addEventListener("click", e => handleSortClick(e));
@@ -140,8 +144,8 @@ async function exec() {
 
   function removeListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").removeEventListener("click", handleNewDirectory, false);
-      document.getElementById("upload-button").removeEventListener("click", handleNewFileClick, false);
+      document.getElementById("new-directory-button").removeEventListener("click", () => addNew('directory'), false);
+      document.getElementById("upload-button").removeEventListener("click", () => addNew('file'), false);
       document.getElementById("name-button").removeEventListener("click", e => handleSortClick(e), false);
       document.getElementById("type-button").removeEventListener("click", e => handleSortClick(e), false);
       document.getElementById("date-button").removeEventListener("click", e => handleSortClick(e), false);
@@ -151,26 +155,33 @@ async function exec() {
   }
 
   // "Member" Functions
-  function newDirectory() {
-    console.log('new directory add')
-    current.push({
-      name: "new_directory",
-      type: "Directory",
-      date: Date.now().toString(),
-      size: 0
-    })
-    console.log(current)
-  }
-  function newFile() {
-    return new Promise( resolve => {
+  function addNewDirectory() {
+    return new Promise( resolve => { 
       current.push({
         name: "new_directory",
-        type: "File",
+        type: "Directory",
         date: Date.now().toString(),
-        size: Math.floor(Math.random() * 100) + 1
+        size: 0
       })
+      resolve();
+    });
+  }
 
-    })
+  function addNew(type) {
+    let n = {}
+    if(type === 'file') n = { name: "new_file", date: Date.now().toString(), size: Math.floor(Math.random() * 100) + 1 }
+    else n = { name: "new_directory", date: Date.now().toString(), size: Math.floor(Math.random() * 100) + 1 }
+    current.push(n);
+    let list = document.getElementById('content-list');
+    let li = document.createElement('li');
+    li.classList.add('list-item');
+    for(attrib in n) {
+      let div = document.createElement('div');
+      div.classList.add(`${attrib}`);
+      div.innerHTML = n[attrib];
+      li.appendChild(div);
+    }
+    list.appendChild(li);
   }
 
   // Ad-hoc render function for ordered file list elements
@@ -178,45 +189,58 @@ async function exec() {
     let list = document.getElementById('content-list');
     for(elem in current) {
       let li = document.createElement('li');
-      li.classList.add('list-item')
+      li.classList.add('list-item');
       for(attrib in current[elem]) {
         let div = document.createElement('div');
-        div.classList.add(`${attrib}`)
-        div.innerHTML = current[elem][attrib]
+        div.classList.add(`${attrib}`);
+        div.innerHTML = current[elem][attrib];
         li.appendChild(div);
       }
       list.appendChild(li);
     }
   }
+  function clearListElements() {
+    return new Promise(resolve => {
+      let ol = document.getElementById('content-list');
+      
+      while(ol.hasChildNodes()) {
+        ol.removeChild(ol.firstChild);
+      }
+      resolve();
+    });
+  }
 
   // simple sorting function extending Array.prototype.sort()
   function sort(attrib) { // <attrib> target attribute for sorting
     return new Promise(resolve => {
-      current.sort((a,b) => {
-        if(lastSort === attrib) {
+      console.log(attrib)
+      if(lastSort === attrib) {
+        current.sort((a,b) => {
+          if(a[attrib] > b[attrib]) return semiphore;
+          else return -semiphore;
+        });
+        semiphore = -semiphore;
+      } else {
+        current.sort((a,b) => {
           if(a[attrib] > b[attrib]) return 1;
-          else return -1
-        } else {
-          if(a[attrib] > b[attrib]) return -1;
-          else return 1
-        }
-      });
+          else return -1;
+        });
+      }
       // keeps track of toggling for sorting
       lastSort = attrib;
+      console.log(lastSort)
       resolve();
     })
   }
 
   // Handlers
   function handleSortClick(e) {
-    let ol = document.getElementById('content-list');
-    while(ol.firstChild) {
-      ol.removeChild(ol.firstChild)
-    }
-    sort(e.target.id.split('-')[0]).then(() => renderListElements());
-  }
-  function handleNewDirectory() { newDirectory().then(() => renderListElements()) };
-  function handleNewFileClick() { newFile().then(() => renderListElements()) }
+    sort(e.target.id.split('-')[0]).then(
+      clearListElements().then(
+        renderListElements()
+      )
+    )
+  } 
 
   init();
 }

@@ -45,7 +45,7 @@ const Routing = () => (
       return null
     }}/>
     <Route render={() => {
-      window.loadFileScript.exit();
+      if(window.loadFileScript.invoked) window.loadFileScript.exit();
       return <NotFound/>
     }}/>
   </Switch>
