@@ -1,89 +1,68 @@
-//Size assumed to be in KB
-
-/////////////////////////////
-//  Constants and Helpers  //
-/////////////////////////////
-
+// Basis for dom content to be inserted
 
 // Random dates between range generated for 'preset' constant
 // modified from: https://stackoverflow.com/questions/9035627/elegant-method-to-generate-array-of-random-dates-within-two-dates
-const randomDate = (start, end) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
-
+const randomDate = () => {
+  let start = new Date(2015, 0, 1)
+  let end = new Date()
+  return  new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+}
 // Preset is unordered
-const files = [
+const folders = [
   {
     name: "zips",
     type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
-    size: 12
+    dateModified: randomDate(),
+    size: 300
   },
   {
     name: "presets",
     type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
+    dateModified: randomDate(),
     size: 4
   },
   {
     name: "workflow",
     type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
+    dateModified: randomDate(),
     size: 37
   },
   {
     name: "software",
     type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
+    dateModified: randomDate(),
     size: 78
-  },
-  {
-    name: "nmm_data",
-    type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
-    size: 60
-  },
-  {
-    name: "readme",
-    type: "File",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
-    size: 1
-  },
-  {
-    name: "schema",
-    type: "File",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
-    size: 12
-  },
-  {
-    name: "etc",
-    type: "Directory",
-    dateModified: randomDate(new Date(2015, 0, 1), new Date()),
-    size: 89
-  },
+  }
 ];
 
-// Basis for dom content to be inserted
+
 const htmlString = `
 <div id="file-container">
   <h1 class="file-header">Files</h1>
   <div class="top-action">
-    <h2>Root /</h2>
-    <div class="left-action">
-      <button id="new-directory-button">New Directory</button>
-      <button id="upload-button">Upload</button>
+    <h2 id="root-header">Root /</h2>
+    <div class="action-row">
+      <div class="left-action">
+        <button id="new-directory-button">New Directory</button>
+        <button id="upload-button">Upload File</button>
+      </div>
+      <div class="right-action">
+        <input type="text" id="search-bar" oninput="loadFileScript.onSearchChange()" placeholder="Search..."/>
+      </div>  
     </div>
-    <div class="right-action">
-      <input type="text" id="search-bar" palceholder="Search..."/>
-    </div>  
   </div>
   <div class="file-section">
-    <div class="sort-buttons">
-      <button id="name-button">Name</button>
-      <button id="type-button">Type</button>
-      <button id="date-button">Date Modified</button>
-      <button id="size-button">Size</button>
-    </div>
-    <ol id="content-list" class="content-list">
-    </ol>
+    <table class="content-table">
+      <thead>
+        <tr>
+          <th class="table-header" scope="col"><span id="name-span">Name</span></th>
+          <th class="table-header" scope="col"><span id="type-span">Type</span></th>
+          <th class="table-header" scope="col"><span id="date-span">Date Modified</span></th>
+          <th class="table-header" scope="col"><span id="size-span">Size</span></th>
+        </tr>
+      </thead>
+      <tbody id="content-table-body"></tbody>
+    </table>
   </div>
 </div>
 ` 
@@ -109,17 +88,18 @@ function insertHtml() {
 }
 
 async function exec() {
-  console.log('Loading script...');
-  //deep copy collection to avoid reference errors
-  let current = files;
+  let current = folders;
+  let root = current;
+  let files = presetFiles;
   let lastSort = 'name';
   let semiphore = 1;
+  let currentFileName = false;
 
   function init(){
     loadFileScript.invoked=1;
     insertHtml().then(() => {
       addListeners();
-      renderListElements();
+      renderTableElements();
     });
   };
 
@@ -132,88 +112,102 @@ async function exec() {
   // Attach and Remove listeners
   function addListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").addEventListener("click", () => addNew('directory'));
-      document.getElementById("upload-button").addEventListener("click", () => addNew('file'));
-      document.getElementById("name-button").addEventListener("click", e => handleSortClick(e));
-      document.getElementById("type-button").addEventListener("click", e => handleSortClick(e));
-      document.getElementById("date-button").addEventListener("click", e => handleSortClick(e));
-      document.getElementById("size-button").addEventListener("click", e => handleSortClick(e));
+      document.getElementById("new-directory-button").addEventListener("click", () => addNew('Directory'));
+      document.getElementById("upload-button").addEventListener("click", () => addNew('File'));
+      document.getElementById("search-bar").addEventListener("keyup", e => onSearchChange(e), false);
+      document.getElementById("name-span").addEventListener("click", e => handleSortClick(e));
+      document.getElementById("type-span").addEventListener("click", e => handleSortClick(e));
+      document.getElementById("date-span").addEventListener("click", e => handleSortClick(e));
+      document.getElementById("size-span").addEventListener("click", e => handleSortClick(e));
+      document.getElementById("root-header").addEventListener("click", () => handleRootClick())
       return resolve();
     })
   }
 
   function removeListeners() {
     return new Promise( resolve => {
-      document.getElementById("new-directory-button").removeEventListener("click", () => addNew('directory'), false);
-      document.getElementById("upload-button").removeEventListener("click", () => addNew('file'), false);
-      document.getElementById("name-button").removeEventListener("click", e => handleSortClick(e), false);
-      document.getElementById("type-button").removeEventListener("click", e => handleSortClick(e), false);
-      document.getElementById("date-button").removeEventListener("click", e => handleSortClick(e), false);
-      document.getElementById("size-button").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("new-directory-button").removeEventListener("click", () => addNew(), false);
+      document.getElementById("upload-button").removeEventListener("click", () => addNew(), false);
+      document.getElementById("search-bar").removeEventListener("keyup", () => onSearchChange(), false);
+      document.getElementById("name-span").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("type-span").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("date-span").removeEventListener("click", e => handleSortClick(e), false);
+      document.getElementById("size-span").removeEventListener("click", e => handleSortClick(e), false);
       return resolve();
     })
   }
 
-  // "Member" Functions
-  function addNewDirectory() {
-    return new Promise( resolve => { 
-      current.push({
-        name: "new_directory",
-        type: "Directory",
-        date: Date.now().toString(),
-        size: 0
-      })
-      resolve();
-    });
-  }
-
+  // Member Functions
   function addNew(type) {
-    let n = {}
-    if(type === 'file') n = { name: "new_file", date: Date.now().toString(), size: Math.floor(Math.random() * 100) + 1 }
-    else n = { name: "new_directory", date: Date.now().toString(), size: Math.floor(Math.random() * 100) + 1 }
-    current.push(n);
-    let list = document.getElementById('content-list');
-    let li = document.createElement('li');
-    li.classList.add('list-item');
+    let n = {
+      name: type === 'File' ? 'new_file' : 'new_directory',
+      type: type,
+      date: Date.now().toString(), 
+      size: Math.floor(Math.random() * 100) + 1
+    };
+    let tbody = document.getElementById('content-table-body');
+    let tr = document.createElement('tr');
+    tr.classList.add('table-row');
+    let input = document.createElement('input');
+    input.value = type === 'File' ? 'new_file' : 'new_directory';
+    tr.appendChild(input);
+    input.addEventListener('blur', e => {
+      n.name = e.target.value
+      if(!!currentFileName ) n.parent = currentFileName;
+      if(type === 'File') {
+        files.push(n);
+        current.push(n);
+      } else {
+        current.push(n);
+      };
+      rerenderTable();
+    })
     for(attrib in n) {
-      let div = document.createElement('div');
-      div.classList.add(`${attrib}`);
-      div.innerHTML = n[attrib];
-      li.appendChild(div);
+      let td = document.createElement('td');
+      td.classList.add(`${attrib}`);
+      td.innerHTML = n[attrib];
+      tr.appendChild(td);
     }
-    list.appendChild(li);
+    tbody.appendChild(tr);
+    input.focus()
   }
 
   // Ad-hoc render function for ordered file list elements
-  function renderListElements() {
-    let list = document.getElementById('content-list');
+  function renderTableElements() {
+    let tbody = document.getElementById('content-table-body');
+    
     for(elem in current) {
-      let li = document.createElement('li');
-      li.classList.add('list-item');
+      let tr = document.createElement('tr');
+      tr.classList.add('table-row');
       for(attrib in current[elem]) {
-        let div = document.createElement('div');
-        div.classList.add(`${attrib}`);
-        div.innerHTML = current[elem][attrib];
-        li.appendChild(div);
+        if(attrib !== 'parent') {
+          let td = document.createElement('td');
+          td.classList.add("table-data");
+          td.classList.add(`${attrib}`);
+          td.innerHTML = current[elem][attrib];
+          td.addEventListener('click', e => handleDirectoryClick(e))
+          tr.appendChild(td);
+        }
       }
-      list.appendChild(li);
+      tbody.appendChild(tr);
     }
   }
-  function clearListElements() {
+
+  function clearTableElements() {
     return new Promise(resolve => {
-      let ol = document.getElementById('content-list');
-      
-      while(ol.hasChildNodes()) {
-        ol.removeChild(ol.firstChild);
+      let tbody = document.getElementById('content-table-body');
+      while(tbody.hasChildNodes()) {
+        tbody.removeChild(tbody.firstChild);
       }
       resolve();
     });
   }
+
+  function rerenderTable() {clearTableElements().then(() => renderTableElements())};
 
   // simple sorting function extending Array.prototype.sort()
   function sort(attrib) { // <attrib> target attribute for sorting
     return new Promise(resolve => {
-      console.log(attrib)
       if(lastSort === attrib) {
         current.sort((a,b) => {
           if(a[attrib] > b[attrib]) return semiphore;
@@ -236,11 +230,126 @@ async function exec() {
   // Handlers
   function handleSortClick(e) {
     sort(e.target.id.split('-')[0]).then(
-      clearListElements().then(
-        renderListElements()
-      )
+      rerenderTable()
     )
-  } 
+  }
+
+  function handleDirectoryClick(e) {
+    currentFileName = e.target.innerHTML
+    current = files.filter(file => file.parent === e.target.innerHTML);
+    document.getElementById("new-directory-button").style.display = 'none';
+    document.getElementById("root-header").innerHTML = `Root / ${e.target.innerHTML}`;
+    rerenderTable();
+  }
+
+  function handleRootClick() {
+    currentFileName = false;
+    current = root;
+    document.getElementById("new-directory-button").style.display = 'inline-block ';
+    document.getElementById("root-header").innerHTML = 'Root /';
+    clearTableElements().then(() => {
+      renderTableElements();
+    })
+  }
+
+  function onSearchChange(e) {
+   let fuse = new Fuse(files, { keys: ['name']})
+   let result = fuse.search(e.target.value)
+   console.log(result);
+   current = result;
+   rerenderTable();
+  }
 
   init();
 }
+
+
+/////////////////////////////
+//  Constants and Helpers  //
+/////////////////////////////
+
+
+
+
+
+
+
+const presetFiles = [
+  {
+    name: "mountsys.zip",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "zips"
+  },
+  {
+    name: "totally_not_cat_pics.zip",
+    type: "File",
+    dateModified: randomDate(),
+    size: 7809,
+    parent: "zips"
+  },
+  {
+    name: "config.py",
+    type: "File",
+    dateModified: randomDate(),
+    size: 300,
+    parent: "presets"
+  },
+  {
+    name: "config.cpp",
+    type: "File",
+    dateModified: randomDate(),
+    size: 12,
+    parent: "presets"
+  },
+  {
+    name: "hacktheplanet.sh",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "workflow"
+  },
+  {
+    name: "thefunk.sh",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "workflow"
+  },
+  {
+    name: "regconfig.exe",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "presets"
+  },
+  {
+    name: "readme",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "software"
+  },
+  {
+    name: "readme",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "software"
+  },
+  {
+    name: "readme",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "software"
+  },
+  {
+    name: "readme",
+    type: "File",
+    dateModified: randomDate(),
+    size: 1,
+    parent: "software"
+  },
+];

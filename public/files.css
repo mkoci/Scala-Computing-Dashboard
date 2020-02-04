@@ -27,8 +27,8 @@
 .top-action,.file-section {
   padding: 2em;
   background-color: white;
-  border: 1px solid;
   border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 .top-action {
   margin: 3em 0;
@@ -37,8 +37,18 @@
   color: black;
 }
 
-.content-list {
+.content-table {
   padding: 0;
+  width: 100%;
+}
+.content-table > thead {
+  border: 3px solid black;
+}
+.table-header {
+  text-align: start;
+}
+.table-row {
+  height: 3em;
   width: 100%;
 }
 
@@ -46,18 +56,14 @@
   margin: auto;
 }
 
-.name {
+.table-data {
+  
+}
 
+.name {
+  width: 40%;
 }
 
 .type {
-
-}
-
-.dateModified {
-
-}
-
-.size {
-  
+  width: 20%;
 }

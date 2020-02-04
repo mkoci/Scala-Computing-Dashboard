@@ -12,20 +12,20 @@
   width: 20vw;
 }
 .sidebar-placeholder {
-  width: 20%;
+  min-width: 20%;
 }
 .sidebar-layout {
   display: grid;
-  grid-template-columns: 20% auto;
+  grid-template-columns: 20vw auto;
   position: relative;
   height: 100%;
-  
 }
 .main-section {
   justify-self: stretch;
 }
-.user-bar {
 
+.root-header {
+  cursor: pointer;
 }
 
 .not-found {
@@ -36,4 +36,23 @@
   text-align: center;
   font-size: 36px;
 }
+.action-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.left-action {
+  justify-self: flex-start;
+}
+.right-action {
+  justify-self: flex-end;
+}
+#search-bar {
+  margin-left: auto;
+}
+
+.table-data.name {
+  cursor: pointer;
+}
+
 
