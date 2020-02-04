@@ -4,7 +4,7 @@
 
 ### Part 1:
 
-I created the sidebar using create-react-app as it allows easy project templating without the need for boilerplate. I chose to use [material-ui](https://github.com/mui-org/material-ui), because it is wildly popular and I wanted to gain some experience using it. Compared to Bootstrap, material-ui embraces more CSS-in-JS. In a larger project, I can see the usefulness in configuring styleguide. 
+I created the sidebar using create-react-app as it allows easy project templating without the need for boilerplate. I chose to use [material-ui](https://github.com/mui-org/material-ui), because it is wildly popular and I wanted to gain some experience using it. Compared to Bootstrap, material-ui embraces more CSS-in-JS. In a larger project, I can see the usefulness in project wide styleguide implementation. 
 
 ### Part 2: 
 
